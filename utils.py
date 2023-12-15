@@ -2,6 +2,8 @@ import pygame
 import sys
 import os
 import math
+from random import *
+import heapq
 
 pygame.init()
 WIDTH = 1000
@@ -20,7 +22,8 @@ class Camera:
     
     def lerpToPos(self, pos):
         # self.targetPos = [pos[0]-WIDTH/2, pos[1]-WIDTH/2]
-        self.targetPos = [-(pos[0]-WIDTH/2), -(pos[1]-WIDTH/2)-150]
+        # self.targetPos = [-(pos[0]-WIDTH/2), -(pos[1]-WIDTH/2)-150]
+        self.targetPos = [-(pos[0]-WIDTH/2), -(pos[1]-HEIGHT/2)]
 
     def update(self):
         if self.offset != self.targetPos:
@@ -209,3 +212,40 @@ class Button:
         self.resizedSurface = pygame.transform.scale(self.surface, (self.convertedRect.width, self.convertedRect.height))
         self.resizedHoverSurface = pygame.transform.scale(self.hoverSurface, (self.convertedRect.width, self.convertedRect.height))
 
+
+
+# A* algorithm
+def heuristic(a, b):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+def astar(start, goal, grid):
+    frontier = []
+    heapq.heappush(frontier, (0, start))
+    came_from = {}
+    cost_so_far = {start: 0}
+
+    while frontier:
+        current_cost, current_node = heapq.heappop(frontier)
+
+        if current_node == goal:
+            path = []
+            while current_node in came_from:
+                path.append(current_node)
+                current_node = came_from[current_node]
+            path.append(start)
+            path.reverse()
+            return path
+
+        for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+            x, y = current_node
+            neighbor = x + dx, y + dy
+
+            if 0 <= neighbor[0] < WIDTH and 0 <= neighbor[1] < HEIGHT and not grid[neighbor[1]][neighbor[0]]:
+                new_cost = cost_so_far[current_node] + 1
+                if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
+                    cost_so_far[neighbor] = new_cost
+                    priority = new_cost + heuristic(goal, neighbor)
+                    heapq.heappush(frontier, (priority, neighbor))
+                    came_from[neighbor] = current_node
+
+    return None

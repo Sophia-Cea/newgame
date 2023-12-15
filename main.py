@@ -1,13 +1,18 @@
 import pygame
 import sys
-# from utils import *
 from state import *
 
 # TODO: 
-# - fix collitions
-# - fix camera so that tiles off screen don't render
 # - make map bigger
-# - add bullets~
+# - add monsters~
+# - health bar
+# - money 
+# - maybe theres stuff in the floor and you can dig up stuff???
+# - caves!!! you have to dig to get from one cave to another
+# - maybe some particle effects when the blocks explode
+# - rockets or bombs or smth that increase the number of blocks that break when shooting
+# - maybe some of the next levels can be traveled to by going down underground through a lil hole
+
 
 pygame.init()
 fpsClock = pygame.time.Clock()
@@ -30,8 +35,6 @@ while running:
     stateManager.run(display, events)
     pygame.transform.scale(display, (WIDTH, HEIGHT))
     screen.fill((255,255,255))
-    # screen.fill((0,0,0))
-    screen.blit(display, camera.offset)
-    # pygame.draw.circle(screen, (255,0,0), (WIDTH/2, HEIGHT/2), 5)
+    screen.blit(display, (0,0))
     pygame.display.flip()
     delta = fpsClock.tick(60)/1000
