@@ -1,5 +1,6 @@
 import pygame
 import json
+from utils import *
 
 
 pygame.init()
@@ -7,18 +8,20 @@ HEIGHT, WIDTH = 700, 1000
 fpsClock = pygame.time.Clock()
 screen = pygame.display.set_mode([1000, 700], pygame.RESIZABLE)
 display = pygame.Surface((1000, 700))
-f = open('map.json')
+f = open('level1.json')
 data = json.load(f)
 f.close()
-map = data["backgroundMap"] #2d array
+dictName = "goodieMap"
+map = data[dictName] #2d array
 mapWidth = len(map[0])
 mapHeight = len(map)
-marginX = 50
+marginX = 65
 tileSize = (WIDTH-2*marginX)/mapWidth
 marginY = (HEIGHT-mapHeight*tileSize)/2
 drawing = False
 erasing = False
 currentDrawingSetting = 1
+coords = Text("(0,0)", "button", (255,255,255), (30, -1), False)
 
 
 def drawGrid():
@@ -38,6 +41,8 @@ def fillGrid():
                 pygame.draw.rect(display, (180,180,180), pygame.Rect(j*tileSize+marginX+1, i*tileSize+marginY+1, tileSize, tileSize))
             if map[i][j] == 4:
                 pygame.draw.rect(display, (255,210,50), pygame.Rect(j*tileSize+marginX+1, i*tileSize+marginY+1, tileSize, tileSize))
+            if map[i][j] == 5:
+                pygame.draw.rect(display, (180,0,180), pygame.Rect(j*tileSize + marginX+1, i*tileSize+marginY+1, tileSize, tileSize))
 
 
 
@@ -45,6 +50,7 @@ def render():
     display.fill((0,0,0))
     drawGrid()
     fillGrid()
+    coords.draw(display)
     if currentDrawingSetting == 1:
         pygame.draw.rect(display, (255,255,255), pygame.Rect(20,20,30,30))
     if currentDrawingSetting == 2:
@@ -53,14 +59,17 @@ def render():
         pygame.draw.rect(display, (180,180,180), pygame.Rect(20,20,30,30))
     if currentDrawingSetting == 4:
         pygame.draw.rect(display, (255,210,50), pygame.Rect(20,20,30,30))
+    if currentDrawingSetting == 4:
+        pygame.draw.rect(display, (180,0,180), pygame.Rect(20,20,30,30))
 
 def update():
-    if drawing:
-        pos = pygame.mouse.get_pos()
+    pos = pygame.mouse.get_pos()
+    if pos[0] > marginX and pos[0] < WIDTH-marginX and pos[1] > marginY and pos[1] < HEIGHT-marginY:
         currentTile = (int((pos[0]-marginX)/tileSize), int((pos[1]-marginY)/tileSize))
+        coords.reset((255,255,255), str(currentTile))
         if erasing:
             map[currentTile[1]][currentTile[0]] = 0
-        else:
+        if drawing:
             map[currentTile[1]][currentTile[0]] = currentDrawingSetting
 
 def handleInput(events):
@@ -90,6 +99,8 @@ def handleInput(events):
                 currentDrawingSetting = 3
             if event.key == pygame.K_4:
                 currentDrawingSetting = 4
+            if event.key == pygame.K_5:
+                currentDrawingSetting = 5
 
         if event.type == pygame.KEYUP:
             erasing = False
@@ -107,8 +118,8 @@ while running:
     for event in events:
         if event.type == pygame.QUIT:
             running = False
-            f = open('map.json', "w")
-            data["backgroundMap"] = map
+            f = open('level1.json', "w")
+            data[dictName] = map
             json.dump(data, f)
             f.close()
             pygame.quit()
@@ -116,7 +127,6 @@ while running:
     render()
     handleInput(events)
     update()
-    print(erasing)
     screen.blit(display, (0,0))
     pygame.display.flip()
     delta = fpsClock.tick(60)/1000

@@ -2,23 +2,17 @@ import pygame
 import sys
 from state import *
 
-# TODO: 
-# - make map bigger
-# - add monsters~
-# - health bar
-# - money 
-# - maybe theres stuff in the floor and you can dig up stuff???
-# - caves!!! you have to dig to get from one cave to another
-# - maybe some particle effects when the blocks explode
-# - rockets or bombs or smth that increase the number of blocks that break when shooting
-# - maybe some of the next levels can be traveled to by going down underground through a lil hole
 
+#TODO next: 
+# - add shop and ability to buy things
+# - add potions
+# - make sure I can upgrade damage in shop
+# - change the gun and rocket to 
 
 pygame.init()
 fpsClock = pygame.time.Clock()
 screen = pygame.display.set_mode([WIDTH, HEIGHT], pygame.RESIZABLE)
 display = pygame.Surface((WIDTH, HEIGHT))
-stateManager = StateManager()
 
 stateManager.push(PlayState())
 

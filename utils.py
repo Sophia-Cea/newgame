@@ -9,7 +9,7 @@ pygame.init()
 WIDTH = 1000
 HEIGHT = 700
 delta = 1
-tileSize = 20
+tileSize = 40
 
 class Camera:
     def __init__(self):
@@ -27,8 +27,8 @@ class Camera:
 
     def update(self):
         if self.offset != self.targetPos:
-            self.offset[0] += (self.targetPos[0] - self.offset[0]) * self.lerpconst
-            self.offset[1] += (self.targetPos[1] - self.offset[1]) * self.lerpconst
+            self.offset[0] += (self.targetPos[0] - self.offset[0]) * self.lerpconst * delta
+            self.offset[1] += (self.targetPos[1] - self.offset[1]) * self.lerpconst * delta
 
 
 camera = Camera()
@@ -88,19 +88,21 @@ class Fonts:
     WIDTH = WIDTH
     HEIGHT = HEIGHT
     fonts = {
-        "title": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/14), bold=False, italic=False),
-        "subtitle": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/20), bold=False, italic=False),
-        "paragraph": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/26), bold=False, italic=False),
-        "button": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/28), bold=False, italic=False)
+        "title": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/18)),
+        "subtitle": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/24)),
+        "paragraph": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/30)),
+        "button": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/28)),
+        "button2": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/36))
     }
 
     def resizeFonts(screen):
         Fonts.WIDTH = screen.get_width()
         Fonts.fonts = {
-            "title": pygame.font.Font(resource_path("font.ttf"), int(Fonts.WIDTH/14), bold=False, italic=False),
-            "subtitle": pygame.font.Font(resource_path("font.ttf"), int(Fonts.WIDTH/20), bold=False, italic=False),
-            "paragraph": pygame.font.Font(resource_path("font.ttf"), int(Fonts.WIDTH/26), bold=False, italic=False),
-            "button": pygame.font.Font(resource_path("font.ttf"), int(Fonts.WIDTH/28), bold=False, italic=False)
+            "title": pygame.font.Font(resource_path("font.ttf"), int(Fonts.WIDTH/14)),
+            "subtitle": pygame.font.Font(resource_path("font.ttf"), int(Fonts.WIDTH/20)),
+            "paragraph": pygame.font.Font(resource_path("font.ttf"), int(Fonts.WIDTH/26)),
+            "button": pygame.font.Font(resource_path("font.ttf"), int(Fonts.WIDTH/28)),
+            "button2": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/36))
         }
 
 class Text:
@@ -131,21 +133,9 @@ class Text:
         if self.centered:
             self.rect = pygame.Rect(surface.get_width()/100*self.pos[0]-self.text.get_width()/2, surface.get_height()/100*self.pos[1], self.text.get_width(), self.text.get_height())
             surface.blit(self.text, (surface.get_width()/100*self.pos[0]-self.text.get_width()/2, surface.get_height()/100*self.pos[1]))
-            if self.underline:
-                smallMargin = surface.get_width()/100*3
-                xCoord1 = surface.get_width()/100*(self.pos[0])-self.text.get_width()/2 + smallMargin
-                xCoord2 = xCoord1 + self.text.get_width() - 2*smallMargin
-                yCoord = surface.get_height()/100 * (self.pos[1]) + self.text.get_height()
-                pygame.draw.line(surface, Colors.accentCol, (xCoord1, yCoord), (xCoord2, yCoord), 5)
         else:
             self.rect = pygame.Rect(surface.get_width()/100*self.pos[0], surface.get_height()/100*self.pos[1], self.text.get_width(), self.text.get_height())
             surface.blit(self.text, (surface.get_width()/100*self.pos[0], surface.get_height()/100*self.pos[1]))
-            if self.underline:
-                smallMargin = surface.get_width()/100*3
-                xCoord1 = surface.get_width()/100*(self.pos[0]) + smallMargin
-                xCoord2 = xCoord1 + self.text.get_width() - 2*smallMargin
-                yCoord = surface.get_height()/100 * (self.pos[1]+1) + self.text.get_height()
-                pygame.draw.line(surface, Colors.accentCol, (xCoord1, yCoord), (xCoord2, yCoord), 5)
 
     def checkMouseOver(self):
         pos = pygame.mouse.get_pos()
@@ -212,7 +202,65 @@ class Button:
         self.resizedSurface = pygame.transform.scale(self.surface, (self.convertedRect.width, self.convertedRect.height))
         self.resizedHoverSurface = pygame.transform.scale(self.hoverSurface, (self.convertedRect.width, self.convertedRect.height))
 
+class PixelButton:
+    def __init__(self, rect, message, col1, col2, icon=None) -> None:
+        self.pixelSize = 7
+        self.hasIcon = False
+        if icon != None:
+            self.hasIcon = True
+            self.iconImg = pygame.image.load(icon)
+            self.iconImg = pygame.transform.scale(self.iconImg, (self.iconImg.get_width()*3, self.iconImg.get_height()*3))
+        if message == None:
+            self.hasMessage = False
+        else:
+            self.hasMessage = True
+            self.text = Text(message, "button2", (255,255,255), (50, 0), True)
+            self.text2 = Text(message, "button2", (255*.8,255*.8,255*.8), (50, 0), True)
+        self.rect = pygame.Rect(rect.x,rect.y, 5*(rect.w//5), 5*(rect.h//5))
+        self.surf = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)
+        self.darkenedSurf = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)
+        self.col1 = col1
+        self.col2 = col2
+        self.drawButton()
 
+    def drawButton(self):
+        pygame.draw.rect(self.surf, self.col2, pygame.Rect(self.pixelSize,0, self.rect.w-2*self.pixelSize,self.pixelSize+1))
+        pygame.draw.rect(self.surf, self.col2, pygame.Rect(self.pixelSize,self.rect.h-self.pixelSize-1, self.rect.w-2*self.pixelSize,self.pixelSize+1))
+        pygame.draw.rect(self.surf, self.col2, pygame.Rect(0, self.pixelSize, self.pixelSize+1, self.rect.h-2*self.pixelSize))
+        pygame.draw.rect(self.surf, self.col2, pygame.Rect(self.rect.w-self.pixelSize-1, self.pixelSize, self.pixelSize+1, self.rect.h-2*self.pixelSize))
+        pygame.draw.rect(self.surf, self.col1, pygame.Rect(self.pixelSize, self.pixelSize, self.rect.width-2*self.pixelSize, self.rect.height-2*self.pixelSize))
+        if self.hasMessage:
+            self.text.draw(self.surf)
+        if self.hasIcon:
+            self.surf.blit(self.iconImg, (self.surf.get_width()/2-self.iconImg.get_width()/2, self.surf.get_height()/2-self.iconImg.get_height()/2))
+
+        self.col3 = (self.col1[0]*.8, self.col1[1]*.8, self.col1[2]*.8)
+        self.col4 = (self.col2[0]*.8, self.col2[1]*.8, self.col2[2]*.8)
+        pygame.draw.rect(self.darkenedSurf, self.col4, pygame.Rect(self.pixelSize,0, self.rect.w-2*self.pixelSize,self.pixelSize+1))
+        pygame.draw.rect(self.darkenedSurf, self.col4, pygame.Rect(self.pixelSize,self.rect.h-self.pixelSize-1, self.rect.w-2*self.pixelSize,self.pixelSize+1))
+        pygame.draw.rect(self.darkenedSurf, self.col4, pygame.Rect(0, self.pixelSize, self.pixelSize+1, self.rect.h-2*self.pixelSize))
+        pygame.draw.rect(self.darkenedSurf, self.col4, pygame.Rect(self.rect.w-self.pixelSize-1, self.pixelSize, self.pixelSize+1, self.rect.h-2*self.pixelSize))
+        pygame.draw.rect(self.darkenedSurf, self.col3, pygame.Rect(self.pixelSize, self.pixelSize, self.rect.width-2*self.pixelSize, self.rect.height-2*self.pixelSize))
+        if self.hasMessage:
+            self.text2.draw(self.darkenedSurf)
+        if self.hasIcon:
+            self.icon2 = self.iconImg.copy()
+            self.icon2.set_alpha(255*.6)
+            self.darkenedSurf.blit(self.icon2, (self.surf.get_width()/2-self.icon2.get_width()/2, self.surf.get_height()/2-self.icon2.get_height()/2))
+
+    def render(self, screen):
+        if not self.hovering():
+            screen.blit(self.surf, self.rect.topleft)
+        else:
+            screen.blit(self.darkenedSurf, self.rect.topleft)
+
+    def hovering(self):
+        if self.rect.collidepoint(pygame.mouse.get_pos()):
+            return True
+        return False
+
+    def update(self):
+        pass
 
 # A* algorithm
 def heuristic(a, b):
