@@ -13,7 +13,8 @@ tileSize = 40
 
 class Camera:
     def __init__(self):
-        self.offset = [0, 0]
+        self.offset = [-1300, -900]
+        # self.offset = [0, 0]
         self.targetPos = [0,0]
         self.lerpconst = .1
 
@@ -21,8 +22,6 @@ class Camera:
         self.offset = [self.offset[0]-x, self.offset[1]-y]
     
     def lerpToPos(self, pos):
-        # self.targetPos = [pos[0]-WIDTH/2, pos[1]-WIDTH/2]
-        # self.targetPos = [-(pos[0]-WIDTH/2), -(pos[1]-WIDTH/2)-150]
         self.targetPos = [-(pos[0]-WIDTH/2), -(pos[1]-HEIGHT/2)]
 
     def update(self):
@@ -92,7 +91,9 @@ class Fonts:
         "subtitle": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/24)),
         "paragraph": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/30)),
         "button": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/28)),
-        "button2": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/36))
+        "button2": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/40)),
+        "shopText": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/55)),
+        "shopText2": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/70))
     }
 
     def resizeFonts(screen):
@@ -102,7 +103,10 @@ class Fonts:
             "subtitle": pygame.font.Font(resource_path("font.ttf"), int(Fonts.WIDTH/20)),
             "paragraph": pygame.font.Font(resource_path("font.ttf"), int(Fonts.WIDTH/26)),
             "button": pygame.font.Font(resource_path("font.ttf"), int(Fonts.WIDTH/28)),
-            "button2": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/36))
+            "button2": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/35)),
+            "shopText": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/67)),
+        "shopText2": pygame.font.Font(resource_path("font.ttf"), int(WIDTH/80))
+
         }
 
 class Text:
@@ -128,14 +132,27 @@ class Text:
         self.content = content
         self.font = Fonts.fonts[self.fontSize]
         self.text = self.font.render(self.content, True, self.color)
+    
+    def setPosition(self, pos):
+        self.pos = pos
 
-    def draw(self, surface):
-        if self.centered:
-            self.rect = pygame.Rect(surface.get_width()/100*self.pos[0]-self.text.get_width()/2, surface.get_height()/100*self.pos[1], self.text.get_width(), self.text.get_height())
-            surface.blit(self.text, (surface.get_width()/100*self.pos[0]-self.text.get_width()/2, surface.get_height()/100*self.pos[1]))
+    def draw(self, surface, noPercent=False):
+        if not noPercent:
+            if self.centered:
+                self.rect = pygame.Rect(surface.get_width()/100*self.pos[0]-self.text.get_width()/2, surface.get_height()/100*self.pos[1], self.text.get_width(), self.text.get_height())
+                surface.blit(self.text, (surface.get_width()/100*self.pos[0]-self.text.get_width()/2, surface.get_height()/100*self.pos[1]))
+            else:
+                self.rect = pygame.Rect(surface.get_width()/100*self.pos[0], surface.get_height()/100*self.pos[1], self.text.get_width(), self.text.get_height())
+                surface.blit(self.text, (surface.get_width()/100*self.pos[0], surface.get_height()/100*self.pos[1]))
         else:
-            self.rect = pygame.Rect(surface.get_width()/100*self.pos[0], surface.get_height()/100*self.pos[1], self.text.get_width(), self.text.get_height())
-            surface.blit(self.text, (surface.get_width()/100*self.pos[0], surface.get_height()/100*self.pos[1]))
+            if self.centered:
+                self.rect = pygame.Rect(self.pos[0]-self.text.get_width()/2, self.pos[1], self.text.get_width(), self.text.get_height())
+                surface.blit(self.text, (self.pos[0]-self.text.get_width()/2, self.pos[1]))
+            else:
+                self.rect = pygame.Rect(self.pos[0], self.pos[1], self.text.get_width(), self.text.get_height())
+                surface.blit(self.text, (self.pos[0], self.pos[1]))
+        
+
 
     def checkMouseOver(self):
         pos = pygame.mouse.get_pos()

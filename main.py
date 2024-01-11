@@ -4,15 +4,29 @@ from state import *
 
 
 #TODO next: 
-# - add shop and ability to buy things
-# - add potions
-# - make sure I can upgrade damage in shop
-# - change the gun and rocket to 
+# - change the gun and rocket to wand and fireballs n shit
+
+
+
+# BUG:
+# - redo lighting
+# - fix the fucked up collisions
 
 pygame.init()
 fpsClock = pygame.time.Clock()
 screen = pygame.display.set_mode([WIDTH, HEIGHT], pygame.RESIZABLE)
 display = pygame.Surface((WIDTH, HEIGHT))
+
+
+
+def setIcon():
+    icon = pygame.image.load("assets/player/player1.png")
+    icon = pygame.transform.scale(icon, (icon.get_width()*4,icon.get_height()*4))
+    iconSurf = pygame.Surface((icon.get_width(), icon.get_height()+7),pygame.SRCALPHA)
+    iconSurf.blit(icon, (0,0))
+    pygame.display.set_icon(iconSurf)
+
+setIcon()
 
 stateManager.push(PlayState())
 

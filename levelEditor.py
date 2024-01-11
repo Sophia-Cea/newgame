@@ -8,10 +8,10 @@ HEIGHT, WIDTH = 700, 1000
 fpsClock = pygame.time.Clock()
 screen = pygame.display.set_mode([1000, 700], pygame.RESIZABLE)
 display = pygame.Surface((1000, 700))
-f = open('level1.json')
+f = open('level2.json')
 data = json.load(f)
 f.close()
-dictName = "goodieMap"
+dictName = "obstacleMap"
 map = data[dictName] #2d array
 mapWidth = len(map[0])
 mapHeight = len(map)
@@ -118,7 +118,7 @@ while running:
     for event in events:
         if event.type == pygame.QUIT:
             running = False
-            f = open('level1.json', "w")
+            f = open('level2.json', "w")
             data[dictName] = map
             json.dump(data, f)
             f.close()

@@ -8,13 +8,13 @@ class Player:
         # self.pos = [WIDTH/2-tileSize/2,HEIGHT/2-tileSize/2]
         self.size = tileSize  #unit in pixels
         self.surface = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
-        self.visionRadius = 50 #units in blocks
+        self.visionRadius = 10 #units in blocks
         World.rangeOfVision = self.visionRadius
         self.velocityX = 0
         self.velocityY = 0
         self.acceleration = .3
         self.maxVelocity = 5
-        self.rect = pygame.Rect(44*tileSize, 30*tileSize, self.size, self.size)
+        self.rect = pygame.Rect(world.playerStartPos[0]*tileSize, world.playerStartPos[1]*tileSize, self.size, self.size)
         pygame.draw.circle(self.surface, (255,255,255), (self.size/2, self.size/2), self.size/2)
         self.movingLeft = False
         self.movingRight = False
@@ -26,7 +26,16 @@ class Player:
         self.bullets = []
         self.bulletVelocity = 6
         Bullet.rangeOfVision = self.visionRadius + 4
-        self.inventory = []
+        self.inventory = [
+            InventoryItem("fireEssence"), 
+            InventoryItem("bones"), 
+            InventoryItem("soulStone"), 
+            InventoryItem("firePetals"), 
+            InventoryItem("magicMushroom"), 
+            InventoryItem("shadowEssence"), 
+            InventoryItem("goldPetals"), 
+            InventoryItem("icePetals"), 
+            ]
         self.money = 100
         self.animation = []
         self.animationDuration = 80
@@ -178,12 +187,20 @@ class Player:
                         willHitDown, tileDown = self.willHitBoxY(5)
                         if self.movingLeft and willHitLeft and type(tileLeft) == Tile and tileLeft.breakable:
                             world.collisionRectMap.remove(tileLeft)
+                            if tileLeft.tileType != 5:
+                                world.addFuel(randint(1,3))
                         elif self.movingRight and willHitRight and type(tileRight) == Tile and tileRight.breakable:
                             world.collisionRectMap.remove(tileRight)
+                            if tileRight.tileType != 5:
+                                world.addFuel(randint(1,3))
                         elif self.movingUp and willHitUp and type(tileUp) == Tile and tileUp.breakable:
                             world.collisionRectMap.remove(tileUp)
+                            if tileUp.tileType != 5:
+                                world.addFuel(randint(1,3))
                         elif self.movingDown and willHitDown and type(tileDown) == Tile and tileDown.breakable:
                             world.collisionRectMap.remove(tileDown)
+                            if tileDown.tileType != 5:
+                                world.addFuel(randint(1,3))
                     
                 
                 if event.key == pygame.K_1:
@@ -229,21 +246,96 @@ class Player:
         return False, None
 
 
-
+# in this doesnt work, make a class for each item
 class InventoryItem:
-    items = []
-    mushrooms = {"g"}
-    def __init__(self) -> None:
-        pass
+    mushrooms = {
+        "glowingMushroom": 0,
+        "magicMushroom": 1,
+        "purpleMuushroom": 2,
+        "blueMushroom": 3,
+        "orangeMushroom": 4
+        }
+    petals = {
+        "glowingPetals": 5,
+        "magicPetals": 6,
+        "goldPetals": 7,
+        "icePetals": 8,
+        "firePetals": 9
+    }
+    essences = {
+        "shadowEssence": 10,
+        "fireEssence": 11,
+        "waterEssence": 12
+    }
+    other = {
+        "bones": 13,
+        "soulStone": 15,
+        "poisonGoo": 16,
+    }
+    items = {
+        "glowingMushroom": 0,
+        "magicMushroom": 1,
+        "purpleMushroom": 2,
+        "blueMushroom": 3,
+        "orangeMushroom": 4,
+        "glowingPetals": 5,
+        "magicPetals": 6,
+        "goldPetals": 7,
+        "icePetals": 8,
+        "firePetals": 9,
+        "shadowEssence": 10,
+        "fireEssence": 11,
+        "waterEssence": 12,
+        "bones": 13,
+        "soulStone": 15,
+        "poisonGoo": 16
+    }
+    itemsImages = {
+        # "glowingMushroom": pygame.image.load("assets/ingredients/glowingMushroom.png"),
+        "magicMushroom": pygame.image.load("assets/ingredients/magicMushroom.png"),
+        # "purpleMushroom": pygame.image.load("assets/ingredients/purpleMushroom.png"),
+        # "blueMushroom": pygame.image.load("assets/ingredients/blueMushroom.png"),
+        # "orangeMushroom": pygame.image.load("assets/ingredients/orangeMushroom.png"),
+        "glowingPetals": pygame.image.load("assets/ingredients/glowingPetals.png"),
+        "magicPetals": pygame.image.load("assets/ingredients/magicPetals.png"),
+        "goldPetals": pygame.image.load("assets/ingredients/goldPetals.png"),
+        "icePetals": pygame.image.load("assets/ingredients/icePetals.png"),
+        "firePetals": pygame.image.load("assets/ingredients/firePetals.png"),
+        "shadowEssence": pygame.image.load("assets/ingredients/shadowEssence.png"),
+        "fireEssence": pygame.image.load("assets/ingredients/fireEssence.png"),
+        "waterEssence": pygame.image.load("assets/ingredients/waterEssence.png"),
+        "bones": pygame.image.load("assets/ingredients/bones.png"),
+        "soulStone": pygame.image.load("assets/ingredients/soulStone.png"),
+        "poisonGoo": pygame.image.load("assets/ingredients/poisonGoo.png")
+    }
 
-class DoorKey(InventoryItem):
-    def __init__(self, door) -> None:
-        super().__init__()
-        self.doorToUnlock = door
+    def __init__(self, item) -> None:
+        self.item = item
+        self.itemNum = InventoryItem.items[item]
+        self.image = pygame.image.load("assets/ingredients/"+item+".png")
+        self.image = pygame.transform.scale(self.image, (self.image.get_width()*4, self.image.get_height()*4))
+    
+    def render(self, screen, pos):
+        screen.blit(self.image, pos)
 
-class Potion:
-    def __init__(self) -> None:
-        pass
+class Potion(InventoryItem):
+    def __init__(self, ingredients, color, name) -> None:
+        self.ingredients = ingredients
+        self.ingredients.sort()
+        self.color = color
+        self.name = name
+        self.image = pygame.image.load("assets/potions/"+ color + ".png")
+        # self.image = pygame.transform.scale(self.image, (self.image.get_width()*6, self.image.get_height()*6))
+        self.ingredientImages = ingredients
+        # for i in range(len(self.ingredients)):
+        #     self.ingredientImages[i] = InventoryItem.itemsImages[self.ingredients[i]]
+
+    def render(self, screen, pos, scale=4):
+        screen.blit(pygame.transform.scale(self.image, (self.image.get_width()*scale, self.image.get_height()*scale)), pos)
+    
+    def drawIngredients(self, screen, index, pos):
+        screen.blit(self.ingredientImages[index], pos)
+
 
 
 

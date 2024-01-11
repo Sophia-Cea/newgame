@@ -1,5 +1,6 @@
 from utils import *
 import json
+global world
 
 
 
@@ -86,6 +87,15 @@ class World:
         self.groundRectMap = [] #1d array
         self.tileSize = tileSize
         self.generateRectMap()
+        self.fuel = 0
+        self.requiredFuel = 100
+        self.playerStartPos = [0,0]
+    
+    def addFuel(self, amount):
+        if self.fuel < self.requiredFuel:
+            self.fuel += amount
+        if self.fuel > self.requiredFuel:
+            self.fuel = self.requiredFuel
 
     def setRangeOfVision(self, val):
         World.rangeOfVision = val
@@ -173,6 +183,42 @@ class Level1(World):
         self.levelNum = levelNum
         self.createMap(levelNum)
         super().__init__()
+        self.requiredFuel = 100
+        self.playerStartPos = [44,30]
+    
+    def update(self):
+        super().update()
+        if self.fuel >= self.requiredFuel:
+            for tile in self.collisionRectMap:
+                if type(tile) != Torch and tile.tileType == 5:
+                    tile.breakable = True
+    
+    def checkPlayerWon(self, player):
+        if player.rect.y > len(self.map) * tileSize:
+            return True
+        return False
+    
+
+class Level2(World):
+    enemies = []
+    def __init__(self, levelNum):
+        self.levelNum = levelNum
+        self.createMap(levelNum)
+        super().__init__()
+        self.requiredFuel = 100
+        self.playerStartPos = [79,9]
+    
+    def update(self):
+        super().update()
+        if self.fuel >= self.requiredFuel:
+            for tile in self.collisionRectMap:
+                if type(tile) != Torch and tile.tileType == 5:
+                    tile.breakable = True
+    
+    def checkPlayerWon(self, player):
+        if player.rect.y > len(self.map) * tileSize:
+            return True
+        return False
 
 
 world = Level1(1)
